@@ -1,0 +1,24 @@
+{
+  "author": "Julian Duniec <julian.duniec@gmail.com> (http://duniec.se/cv)",
+  "name": "Article-AI",
+  "description": "Article database",
+  "version": "0.0.0",
+  "repository": {
+    "url": ""
+  },
+  "engines": {
+    "node": ">=0.8.14"
+  },
+  "scripts" : {
+    "start" : "node main.js"
+  },
+  "dependencies": {
+      "scraper"             : "x.x.x",
+      "http-agent" : "x.x.x",
+      "jsdom" : "x.x.x",
+      "jquery" : "x.x.x"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {}
+}
+
