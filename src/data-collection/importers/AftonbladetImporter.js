@@ -2,26 +2,7 @@ var
 	Scraper = require('scraper');
 
 module.exports = {
-	getArticles : function(callback) {
-		var me = this;
-		me.fetchLinks(function(err, links) {
-		  	var articles = [];
-		  	console.log(links.length + ' link')
-		  	var started = 0;
-		  	links.forEach(function(link) {
-		  		++started;
-		  		me.importArticle(link, function(err, article) {
-		  			console.log(started);
-
-		  			if(!err && article.headline != null && article.body != null)
-		  				articles.push(article);
-		  			if(--started == 0)
-		  				callback(articles);
-		  				
-		  		});
-		  	});
-		});
-	},
+	_id : 'AftonbladetImporter',
 
 	fetchLinks : function(callback) {
 		try {

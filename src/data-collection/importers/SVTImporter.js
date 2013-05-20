@@ -3,6 +3,7 @@ var
 	Scraper = require('scraper');
 
 module.exports = {
+	_id : 'SVTImporter',
 	fetchLinks : function(callback) {
 		try {
 			var links = [];

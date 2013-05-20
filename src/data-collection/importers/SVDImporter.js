@@ -2,6 +2,7 @@ var
 	Scraper = require('scraper');
 
 module.exports = {
+	_id : 'SVDImporter',
 	fetchLinks : function(callback) {
 		try {
 			Scraper("http://www.svd.se", function(err, query) {

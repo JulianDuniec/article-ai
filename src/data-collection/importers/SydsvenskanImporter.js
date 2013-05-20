@@ -3,6 +3,7 @@ var
 	Scraper = require('scraper');
 
 module.exports = {
+	_id : 'SydsvenskanImporter',
 	fetchLinks : function(callback) {
 		try {
 			var links = [];

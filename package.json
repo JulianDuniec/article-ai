@@ -16,7 +16,8 @@
       "scraper"             : "x.x.x",
       "http-agent" : "x.x.x",
       "jsdom" : "x.x.x",
-      "jquery" : "x.x.x"
+      "jquery" : "x.x.x",
+      "underscore" : "x.x.x"
   },
   "devDependencies": {},
   "optionalDependencies": {}

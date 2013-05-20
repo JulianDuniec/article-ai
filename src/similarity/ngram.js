@@ -1,12 +1,11 @@
 module.exports = {
-	create : function(corpus, gramLength, grams) {
-		if(!grams)
-			grams = {};
+	create : function(corpus, gramLength) {
+		var grams = {};
 			
-		if(corpus.length >= gramLength) {
+		while(corpus.length >= gramLength) {
 			var gram = corpus.substring(0, gramLength);
 			grams[gram] = (grams[gram] || 0) + 1;
-			this.create(corpus.substring(1), gramLength, grams)
+			corpus = corpus.substring(1);
 		}
 
 		return grams;
@@ -41,24 +40,14 @@ module.exports = {
 		return compressed;
 	},
 
-	union : function(a, b) {
-		var res = {};
-		for(key in a) {
-			res[key] = a[key];
-		}
-		for(key in b) {
-			res[key] = (res[key] || 0) + b[key];
-		}
-		return res;
-	},
-
+	
 	similarity : function(a, b, referenceTable) {
 		var sum = 0;
 		for(key in referenceTable) {
 			var frequency = referenceTable[key];
 			if(a[key] && b[key]) {
 				var diff = Math.abs((a[key] || 0)-(b[key] || 0));
-				sum += (1/(frequency+1))/(diff + 1);
+				sum += (1/(frequency))/(diff + 1);
 			}
 			
 		}

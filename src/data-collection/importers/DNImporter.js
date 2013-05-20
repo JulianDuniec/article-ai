@@ -2,6 +2,7 @@ var
 	Scraper = require('scraper');
 
 module.exports = {
+	_id : 'DNImporter',
 	fetchLinks : function(callback) {
 		try {
 			Scraper("http://www.dn.se", function(err, query) {
