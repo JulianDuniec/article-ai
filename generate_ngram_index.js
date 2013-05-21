@@ -1,22 +1,31 @@
-var LinkQueue = require('./src/data-access/LinkQueue');
-var DataCollector = require('./src/data-collection/DataCollector');
-var Article = require('./src/data-access/Article');
-var cluster = require('cluster');
+var Article = require('./src/models/Article');
+var db = require('./src/models/db');
+var NGramIndex = require('./src/models/NGramIndex');
 var ngram = require('./src/similarity/ngram');
 
+function aggregate(articles, callback, index) {
+	index = index || {};
 
-var aggregate = {};
-Article.getAllArticles(function(articles) {
-	articles.forEach(function(article) {
-		try {
-			var gram = Article.loadNgramSync(article);
-			ngram.merge(gram, aggregate);
-		} catch(ex) {
-			console.log(ex);
-		}
+	articles.nextObject(function(err, article) {
+		if(article == null) {
+			index = ngram.compress(index, 5000, 0.5);
+			callback(index);
+		} else {
+			ngram.merge(article.ngram, index);
+			aggregate(articles, callback, index);
+		}			
 	});
-	aggregate = ngram.compress(aggregate, 5000, 0.5);
-	Article.saveNgramIndex(aggregate, function(err) {
-		console.log("Done!");
-	});
-})
+}
+
+db.start(function() {
+	Article.find({ngram : {$ne : {}}, ngram : {$exists : true}}, function(err, articles) {
+		articles.nextObject(function(err, article) {
+			aggregate(articles, function(ngramindex) {
+				NGramIndex.save(ngramindex, function() {
+					db.stop();
+				});
+			});	
+		});
+		
+	});	
+});

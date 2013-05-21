@@ -1,13 +1,17 @@
-var LinkQueue = require('./src/data-access/LinkQueue');
+var ImportQueue = require('./src/models/ImportQueue');
 var DataCollector = require('./src/data-collection/DataCollector');
-var Article = require('./src/data-access/Article');
-var cluster = require('cluster');
+var db = require('./src/models/db');
 
-DataCollector.getLinks(
-	function(link, importer) {
-		LinkQueue.enqueue(importer, link);
-	},
-	function() {
-		console.log("Complete!");
-	}
-);
+db.start(function() {
+	DataCollector.getLinks(
+		function(link, importer) {
+			ImportQueue.enqueue(importer, link, function(res) {
+				if(res != null) console.log(res);
+			});
+		},
+		function() {
+			db.stop();
+		}
+	);
+})
+

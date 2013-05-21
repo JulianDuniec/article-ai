@@ -1,3 +1,3 @@
 for article in articles
 	li
-		a(href='/article/' + article) Article #{article}
+		a(href='/article/' + article._id)=article.headline

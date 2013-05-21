@@ -1,59 +1,61 @@
-var LinkQueue = require('./src/data-access/LinkQueue');
-var DataCollector = require('./src/data-collection/DataCollector');
-var Article = require('./src/data-access/Article');
-var cluster = require('cluster');
+var db = require('./src/models/db');
+var Article = require('./src/models/Article');
+var NGramIndex = require('./src/models/NGramIndex');
 var ngram = require('./src/similarity/ngram');
+var _ = require('underscore');
 
-function sortAndCap(obj, top) {
-	var res = [];
-	var count = 0;
-	for(key in obj) {
-		res.push({k : key, v : obj[key]});
-	}
-	res.sort(function(a, b) {
-		return a.v > b.v ? -1 : (a.v == b.v ? 0 : 1);
+function sortAndCap(arr, top) {
+	
+	arr.sort(function(a, b) {
+		return a.similarity > b.similarity ? -1 : (a.similarity == b.similarity ? 0 : 1);
 	});
 
-	res =  res.splice(0, top);
-	var r = {};
-	res.forEach(function(i) {
-		r[i.k] = i.v
-	});
-	return r;
+	return arr.splice(0, top);
 }
 
-
-Article.getAllArticles(function(articles) {
-	Article.loadNgramIndex(function(ngramIndex) {
-		for (var i = articles.length - 1; i >= 0; i--) {
-			var a = articles[i];
-			if(!Article.hasSimilar(a) && Article.hasNgram(a)) {
-				var ngrama = Article.loadNgramSync(a);
-				if(Object.keys(ngrama).length > 10) {
-					var asimilar = {};
-					for (var j = articles.length - 1; j >= 0; j--) {
-						var b = articles[j];
-						if(Article.hasNgram(b) && i != j) {
-							var ngramb = Article.loadNgramSync(b);
-							if(Object.keys(ngramb).length > 10) {
-								var similarity = ngram.similarity(ngrama, ngramb, ngramIndex);
-								asimilar[b] = similarity;
-								if(similarity>2) {
-									var a1 = Article.loadSync(a);
-									var b1 = Article.loadSync(b);
-									console.log(similarity)
-									console.log(a1.url, b1.url);
-									console.log(a1.headline, b1.headline);
-									console.log("*****************************");
-								}
-									
+db.start(function() {
+	NGramIndex.findOne({}, function(err, index) {
+		Article.find({ngram : {$ne : null}, ngram : {$exists : true}}, function(err, articles) {
+			articles = articles.toArray(function(err, articles) {
+				var changes = [];
+				var len = articles.length;
+				for (var i = 0; i < len; i++) {
+					console.log(i, "of", len);
+					var a = articles[i];
+					if(a.similar != null)
+						continue;
+					
+					if(Object.keys(a.ngram).length > 10) {
+						for (var j = i+1; j < len; j++) {
+							var b = articles[j];
+							if(b.similar == null)
+								b.similar = [];
+							if(Object.keys(b.ngram).length > 10) {
+								var similarity = ngram.similarity(a.ngram, b.ngram, index.index);
+								a.similar.push({_id: b._id, similarity : similarity, headline : b.headline, url : b.url});
+								b.similar.push({_id: a._id, similarity : similarity, headline : a.headline, url : a.url});
+								changes.push(a);
+								changes.push(b);
 							}
 						}
-					};
-					Article.saveSimilarsSync(a, sortAndCap(asimilar, 30));
+					}
+					
 				}
-				
-			}
-		};
-	})
+				if(changes.length == 0)
+					db.stop();
+				var started = 0;
+				changes.forEach(function(article) {
+					article.similar = sortAndCap(article.similar, 20);
+					++started;
+					Article.save(article, function() {
+						console.log("Saved", started);
+						if(--started == 0)
+							db.stop();
+					});
+				})
+			});
+			
+		});
+	});
+	
 });

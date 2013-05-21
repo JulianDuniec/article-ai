@@ -13,11 +13,12 @@
     "start" : "node main.js"
   },
   "dependencies": {
-      "scraper"             : "x.x.x",
-      "http-agent" : "x.x.x",
-      "jsdom" : "x.x.x",
-      "jquery" : "x.x.x",
-      "underscore" : "x.x.x"
+      "scraper"     : "x.x.x",
+      "http-agent"  : "x.x.x",
+      "jsdom"       : "x.x.x",
+      "jquery"      : "x.x.x",
+      "underscore"  : "x.x.x",
+      "mongodb"     : "x.x.x"
   },
   "devDependencies": {},
   "optionalDependencies": {}

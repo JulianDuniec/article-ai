@@ -1,49 +1,59 @@
-var LinkQueue = require('./src/data-access/LinkQueue');
-var DataCollector = require('./src/data-collection/DataCollector');
-var Article = require('./src/data-access/Article');
+var Article = require('./src/models/Article');
+var db = require('./src/models/db');
 var cluster = require('cluster');
 var ngram = require('./src/similarity/ngram');
+var numCPUs = require('os').cpus().length;
 
 
 
 if(cluster.isMaster) {
-	
-	Article.getArticlesWithoutNGram(function(articles) {
-		var count = 0;
-		console.log(articles);
-		function processQueue() {
-			if(count < 20 && articles.length > 0) {
-				++count;
-				var article = articles.pop();
-				var worker = cluster.fork({
-						articleId : article
-					});
-				worker.on('exit', function() {
-					count -= 1;
-					console.log("Process exited", count);
-					processQueue();
-				});
-				processQueue();
+	db.start(function() {
+		Article.find({ngram : null}, function(err, articles) {
+			var count = 0;
+			function processQueue() {
+				if(count < numCPUs * 2) {
+					++count;
+					articles.nextObject(function(err, article) {
+						if(article == null)
+						{
+							db.stop();
+							return;
+						}	
+						var worker = cluster.fork({
+								url : article.url
+							});
+						worker.on('exit', function() {
+							count -= 1;
+							console.log("Process exited", count);
+							if(count == 0)
+								db.stop();
+							processQueue();
+						});
+						processQueue();
+					});					
+				}
 			}
-		}
 
-		processQueue();
-	});
-	
-	
-} else if(cluster.isWorker) {
-	var articleId = process.env.articleId;
-	Article.load(articleId, function(article) {
-		var corpus = (article.headline || "") + " "
-						+ (article.lead || "") + " "
-						+ (article.body || "");
-		corpus = corpus.replace(/[&\/\\#,+()$~%.'":*?<>-_{}]/g,' ');
-		corpus = corpus.replace(/\n/g, '');
-		corpus = corpus.replace(/\r/g, '');
-		corpus = corpus.replace('  ', ' ');
-		var n = ngram.create(corpus, 4);
-		Article.saveNgram(articleId, n, function() {
-			process.exit(1);
+			processQueue();
 		});
 	});
+} else if(cluster.isWorker) {
+	var url = process.env.url;
+	db.start(function() {
+		Article.findOne({url : url}, function(err, article) {
+			var corpus = (article.headline || "") + " "
+							+ (article.lead || "") + " "
+							+ (article.body || "");
+			corpus = corpus.replace(/[&\/\\#,+()$~%.'":*?<>-_{}]/g,' ');
+			corpus = corpus.replace(/\n/g, '');
+			corpus = corpus.replace(/\r/g, '');
+			corpus = corpus.replace('  ', ' ');
+			article.ngram = ngram.create(corpus, 4);
+			Article.save(article, function() {
+				console.log(arguments);
+				process.exit(1);
+			});
+		});
+	});
+	
 }

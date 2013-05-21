@@ -1,9 +1,9 @@
 
-div(style='float:left; width:250px;font-size:12px')
+div(style='float:left; width:250px;')
 	ul
 		for article in articles
 			li
-				a(href='/article/' + article) #{article}
+				a(href='/article/' + article._id)=article.headline
 div(style='float:left; width:600px;padding:20px')
 	a(href='/') Index
 	h1=article.headline
@@ -13,10 +13,11 @@ div(style='float:left; width:600px;padding:20px')
 	time=article.pubdate
 
 	p=article.body
-div(style='float:left; width:100px')
-	if similars != null
-		ul(style='list-style-type:none;margin:0px;padding:0px')
-			for key in Object.keys(similars)
-				li
-					a(href='/article/' + key)=similars[key].toFixed(3)
-	
+div(style='float:left; width:200px')
+	if article.similar != null
+		ul
+			for similar in article.similar
+				if similar.similarity > 0.8
+					li
+						a(href='/article/' + similar._id)=similar.headline + '(' + similar.similarity + ')'
+		
