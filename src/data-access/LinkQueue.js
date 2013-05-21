@@ -15,7 +15,8 @@ module.exports = {
 	dequeue : function(callback) {
 		var me = this;
 		var stream = fs.createReadStream(linkArchiveFile, {
-			bufferSize : 200
+			bufferSize : 200,
+			autoClose : true
 		});
 		var string = "";
 		stream

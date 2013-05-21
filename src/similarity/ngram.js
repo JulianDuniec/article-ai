@@ -45,13 +45,13 @@ module.exports = {
 		var sum = 0;
 		for(key in referenceTable) {
 			var frequency = referenceTable[key];
-			if(a[key] && b[key]) {
+			if(a[key] && b[key] && frequency != null) {
 				var diff = Math.abs((a[key] || 0)-(b[key] || 0));
 				sum += (1/(frequency))/(diff + 1);
 			}
 			
 		}
-		return sum;
+		return sum ;
 	},
 
 	normalize : function(grams, low, high) {

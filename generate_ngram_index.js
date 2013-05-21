@@ -15,7 +15,7 @@ Article.getAllArticles(function(articles) {
 			console.log(ex);
 		}
 	});
-	aggregate = ngram.compress(aggregate, 4069, 0.05);
+	aggregate = ngram.compress(aggregate, 5000, 0.5);
 	Article.saveNgramIndex(aggregate, function(err) {
 		console.log("Done!");
 	});

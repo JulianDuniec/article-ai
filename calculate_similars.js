@@ -41,8 +41,10 @@ Article.getAllArticles(function(articles) {
 								if(similarity>2) {
 									var a1 = Article.loadSync(a);
 									var b1 = Article.loadSync(b);
-									console.log(a1.url, b1.url, similarity);
-									console.log(a1.headline, b1.headline, similarity);
+									console.log(similarity)
+									console.log(a1.url, b1.url);
+									console.log(a1.headline, b1.headline);
+									console.log("*****************************");
 								}
 									
 							}

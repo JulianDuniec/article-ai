@@ -2,6 +2,7 @@ var crypto = require('crypto');
 var fs = require('fs');
 var _ = require('underscore');
 
+
 module.exports = {
 	getFileName : function(url) {
 		var md5sum = crypto.createHash('md5');
@@ -28,11 +29,21 @@ module.exports = {
 		fs.writeFileSync(filename, JSON.stringify(similars));
 	},
 
+	loadSimilars : function(article, callback) {
+		if(!this.hasSimilar(article))
+			callback(null);
+		else
+			fs.readFile(__dirname + '/../../_data/similars/' + article, 'utf8', function(err, file) {
+				callback(JSON.parse(file));
+			});
+	},
+
 	load : function(id, callback) {
 		fs.readFile(__dirname + '/../../_data/articles/' + id, 'utf8', function(err, file) {
 			callback(JSON.parse(file));
 		});
 	},
+
 	loadSync : function(id) {
 		var d = fs.readFileSync(__dirname + '/../../_data/articles/' + id, 'utf8');
 		return JSON.parse(d);

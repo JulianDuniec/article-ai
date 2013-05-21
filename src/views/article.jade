@@ -1,0 +1,22 @@
+
+div(style='float:left; width:250px;font-size:12px')
+	ul
+		for article in articles
+			li
+				a(href='/article/' + article) #{article}
+div(style='float:left; width:600px;padding:20px')
+	a(href='/') Index
+	h1=article.headline
+	h3=article.lead
+	p
+		a(href=article.url)=article.url
+	time=article.pubdate
+
+	p=article.body
+div(style='float:left; width:100px')
+	if similars != null
+		ul(style='list-style-type:none;margin:0px;padding:0px')
+			for key in Object.keys(similars)
+				li
+					a(href='/article/' + key)=similars[key].toFixed(3)
+	

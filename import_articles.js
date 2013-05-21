@@ -2,11 +2,12 @@ var LinkQueue = require('./src/data-access/LinkQueue');
 var DataCollector = require('./src/data-collection/DataCollector');
 var Article = require('./src/data-access/Article');
 var cluster = require('cluster');
+var numCPUs = require('os').cpus().length;
 
 if(cluster.isMaster) {
 	var count = 0;
 	function processQueue() {
-		if(count < 10) {
+		if(count < numCPUs*2) {
 			++count;
 			LinkQueue.dequeue(function(link) {
 				if(link != null)
