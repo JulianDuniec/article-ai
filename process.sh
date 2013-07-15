@@ -1,7 +1,3 @@
-mkdir _data
-mkdir _data/articles
-mkdir _data/ngrams
-mkdir _data/similars
 node find_new
 node import_articles
 node generate_ngram.js
